@@ -1,0 +1,134 @@
+---
+title: "Datos de Coffee-quality"
+author: "Irina Pérez Lescano"
+format:
+  html:
+    theme: journal
+    lang: es
+    toc: true
+---
+
+# Introducción
+Este documento contiene un conjunto de gráficos estadísticos acerca de un estudio de 206 muestras de café que se realizaron en distintas partes del mundo donde se tomaron en cuenta variables como el origen del país, las variedad, el color, la altitud, entre otras características más.   
+
+La información que se utilizó en este documento para realizar los gráficos estadísticos fue tomada del repositorio en GitHub de [Fatih Boyar](https://github.com/fatih-boyar/coffee-quality-data-CQI) 
+
+# Carga de paquetes
+
+```{r}
+#| label: carga-paquetes
+#| Warning: false
+#| message: false
+
+library(tidyverse)
+library(plotly)
+library(DT)
+library(ggthemes)
+library(hrbrthemes)
+
+```
+
+# Tabla de datos coffee-quality
+
+```{r}
+#| label: tabla-datos-coffee-quality
+#| Warning: false
+#| message: false
+#| code-fold: true
+
+## Carga de datos
+coffee_quality <- read.csv("coffee-quality.csv") 
+
+## Tabla de datos
+coffee_quality <-
+  read_delim(
+    file = "coffee-quality.csv",
+    col_select = c(
+      "Country_of_Origin",
+      "Variety",
+      "Color",
+      "Altitude",
+      "Total_Cup_Points"
+    )
+      )
+
+coffee_quality |>
+  datatable(
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+    )
+  )
+
+```
+
+# Gráficos Estadísticos
+
+## Histograma de distribrución del puntaje total de cada muestra
+```{r}
+#| label: histograma
+#| message: false
+#| Warning: false
+#| code-fold: true
+
+histograma_ggplot2 <-
+  coffee_quality |>
+  ggplot(aes(x = Total_Cup_Points)) +
+  geom_histogram(
+    aes( y = after_stat(count)),
+  bins = 15) +
+  geom_density(color = "orange") +
+  ggtitle("Distribución del puntaje total") +
+  xlab("Puntaje Total") +
+  ylab("Densidad") +
+  labs(subtitle = "Datos de coffee-quality", caption = "Fuente: coffee-quality") +
+  theme_solarized()
+
+ggplotly(histograma_ggplot2, tooltip = "all") |>
+  config(locale = 'es')
+```
+
+## Gráfico de dispersión sobre la altitud vs el puntaje total
+```{r}
+#| label: gráfico-dispersion
+#| message: false
+#| Warning: false
+#| code-fold: true
+
+## carga de datos NA
+datos_NA <- data.frame(x = c(1, 2, 3, NA, 5), y = c(2, 4, 6, Inf, 10))
+
+grafico_dispersion_ggplot2 <-
+  coffee_quality |>
+  ggplot(aes(x = Total_Cup_Points, y = Altitude,)) +
+  geom_point(aes()) +
+  geom_smooth(method = "lm", na.rm = TRUE) +
+  ggtitle("Distribución del puntaje total vs la altitud") +
+  xlab("Puntaje total") +
+  ylab("Altitud") +
+  labs(caption = "Fuente: coffee-quality") +
+  theme_solarized()
+
+ggplotly(grafico_dispersion_ggplot2, tooltip = "all") |>
+  config(locale = 'es')
+```
+
+## Gráfico de caja de las estadísticas del puntaje total sobre la variable del Color.
+```{r}
+#| label: gráfico-caja
+#| message: false
+#| Warning: false
+#| code-fold: true
+
+boxplot_ggplot2<-
+coffee_quality |>
+  ggplot(aes(x = Color, y = Total_Cup_Points)) +
+  geom_boxplot() +
+  ggtitle("Estadisticas del puntaje total sobre el color de cada variedad") +
+  ylab("Puntaje Total") +
+  labs(caption = "Fuente: coffe_quality") +
+  theme_solarized()
+
+ggplotly(boxplot_ggplot2) |> 
+  config(locale = 'es')
+```
